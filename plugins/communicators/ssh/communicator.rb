@@ -160,10 +160,10 @@ module VagrantPlugins
           return false
         end
 
-        # Verify the shell is valid
-        if execute("", error_check: false) != 0
-          raise Vagrant::Errors::SSHInvalidShell
-        end
+        # # Verify the shell is valid
+        # if execute("", error_check: false) != 0
+        #   raise Vagrant::Errors::SSHInvalidShell
+        # end
 
         # If we're already attempting to switch out the SSH key, then
         # just return that we're ready (for Machine#guest).
