@@ -174,9 +174,9 @@ module VagrantPlugins
           @inserted_key = true
         end
 
-        if auth_error
-          binding.pry
-        end
+        # if auth_error
+        #   binding.pry
+        # end
 
         # If we used a password, then insert the insecure key
         ssh_info = @machine.ssh_info
@@ -190,7 +190,7 @@ module VagrantPlugins
           end
         end
 
-        if insert
+        if insert || auth_error
           # If we don't have the power to insert/remove keys, then its an error
           cap = @machine.guest.capability?(:insert_public_key) &&
               @machine.guest.capability?(:remove_public_key)
