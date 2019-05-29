@@ -16,6 +16,8 @@ require 'vagrant/util/keypair'
 require 'vagrant/util/platform'
 require 'vagrant/util/retryable'
 
+require 'pry'
+
 module VagrantPlugins
   module CommunicatorSSH
     # This class provides communication with the VM via SSH.
@@ -169,6 +171,8 @@ module VagrantPlugins
         # If we used a password, then insert the insecure key
         ssh_info = @machine.ssh_info
         insert   = ssh_info[:password] && ssh_info[:private_key_path].empty?
+        
+        binding.pry
         ssh_info[:private_key_path].each do |pk|
           if insecure_key?(pk)
             insert = true
