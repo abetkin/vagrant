@@ -174,9 +174,7 @@ module VagrantPlugins
           @inserted_key = true
         end
 
-        # if auth_error
-        #   binding.pry
-        # end
+
 
         # If we used a password, then insert the insecure key
         ssh_info = @machine.ssh_info
@@ -188,6 +186,10 @@ module VagrantPlugins
             @machine.ui.detail("\n"+I18n.t("vagrant.inserting_insecure_detected"))
             break
           end
+        end
+
+        if auth_error
+          binding.pry
         end
 
         if insert || auth_error
