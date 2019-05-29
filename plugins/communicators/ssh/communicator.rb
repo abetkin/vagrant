@@ -153,7 +153,10 @@ module VagrantPlugins
           @logger.info("SSH is ready!")
 
         rescue Vagrant::Errors::SSHAuthenticationFailed => e
-          auth_error = true
+          _pub, priv, openssh = Vagrant::Util::Keypair.create
+          @machine.data_dir.join("private_key").open("w+") do |f|
+            f.write(priv)
+          end
         rescue Vagrant::Errors::VagrantError => e
           # We catch a `VagrantError` which would signal that something went
           # wrong expectedly in the `connect`, which means we didn't connect.
@@ -188,11 +191,11 @@ module VagrantPlugins
           end
         end
 
-        if auth_error
-          binding.pry
-        end
+        # if auth_error
+        #   binding.pry
+        # end
 
-        if insert || auth_error
+        if insert
           # If we don't have the power to insert/remove keys, then its an error
           cap = @machine.guest.capability?(:insert_public_key) &&
               @machine.guest.capability?(:remove_public_key)
