@@ -154,6 +154,8 @@ module VagrantPlugins
           # We catch a `VagrantError` which would signal that something went
           # wrong expectedly in the `connect`, which means we didn't connect.
           @logger.info("SSH not up: #{e.inspect}")
+          binding.pry
+
           @machine.ui.detail("SSH not up: #{e.inspect}")
           return false
         end
@@ -173,7 +175,7 @@ module VagrantPlugins
         # If we used a password, then insert the insecure key
         ssh_info = @machine.ssh_info
         insert   = ssh_info[:password] && ssh_info[:private_key_path].empty?
-        binding.pry
+
         ssh_info[:private_key_path].each do |pk|
           if insecure_key?(pk)
             insert = true
