@@ -157,6 +157,7 @@ module VagrantPlugins
           @machine.data_dir.join("private_key").open("w+") do |f|
             f.write(priv)
           end
+          return false
         rescue Vagrant::Errors::VagrantError => e
           # We catch a `VagrantError` which would signal that something went
           # wrong expectedly in the `connect`, which means we didn't connect.
@@ -165,10 +166,10 @@ module VagrantPlugins
           return false
         end
 
-        # # Verify the shell is valid
-        # if execute("", error_check: false) != 0
-        #   raise Vagrant::Errors::SSHInvalidShell
-        # end
+        # Verify the shell is valid
+        if execute("", error_check: false) != 0
+          raise Vagrant::Errors::SSHInvalidShell
+        end
 
         # If we're already attempting to switch out the SSH key, then
         # just return that we're ready (for Machine#guest).
