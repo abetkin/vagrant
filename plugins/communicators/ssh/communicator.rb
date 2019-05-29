@@ -157,7 +157,7 @@ module VagrantPlugins
           @machine.data_dir.join("private_key").open("w+") do |f|
             f.write(priv)
           end
-          return false
+          return true
         rescue Vagrant::Errors::VagrantError => e
           # We catch a `VagrantError` which would signal that something went
           # wrong expectedly in the `connect`, which means we didn't connect.
