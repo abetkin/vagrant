@@ -152,12 +152,12 @@ module VagrantPlugins
           connect
           @logger.info("SSH is ready!")
 
-        rescue Vagrant::Errors::SSHAuthenticationFailed => e
-          _pub, priv, openssh = Vagrant::Util::Keypair.create
-          @machine.data_dir.join("private_key").open("w+") do |f|
-            f.write(priv)
-          end
-          return true
+        # rescue Vagrant::Errors::SSHAuthenticationFailed => e
+        #   _pub, priv, openssh = Vagrant::Util::Keypair.create
+        #   @machine.data_dir.join("private_key").open("w+") do |f|
+        #     f.write(priv)
+        #   end
+        #   return true
         rescue Vagrant::Errors::VagrantError => e
           # We catch a `VagrantError` which would signal that something went
           # wrong expectedly in the `connect`, which means we didn't connect.
@@ -186,6 +186,7 @@ module VagrantPlugins
 
         ssh_info[:private_key_path].each do |pk|
           if insecure_key?(pk)
+            binding.pry
             insert = true
             @machine.ui.detail("\n"+I18n.t("vagrant.inserting_insecure_detected"))
             break
