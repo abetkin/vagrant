@@ -32,16 +32,16 @@ module VagrantPlugins
       # errors that are generally fixed from a retry and don't
       # necessarily represent immediate failure cases.
       SSH_RETRY_EXCEPTIONS = [
-        Errno::EACCES,
-        Errno::EADDRINUSE,
-        Errno::ECONNABORTED,
-        Errno::ECONNREFUSED,
-        Errno::ECONNRESET,
-        Errno::ENETUNREACH,
-        Errno::EHOSTUNREACH,
-        Errno::EPIPE,
-        Net::SSH::Disconnect,
-        Timeout::Error
+          Errno::EACCES,
+          Errno::EADDRINUSE,
+          Errno::ECONNABORTED,
+          Errno::ECONNREFUSED,
+          Errno::ECONNRESET,
+          Errno::ENETUNREACH,
+          Errno::EHOSTUNREACH,
+          Errno::EPIPE,
+          Net::SSH::Disconnect,
+          Timeout::Error
       ]
 
       include Vagrant::Util::ANSIEscapeCodeRemover
@@ -143,6 +143,7 @@ module VagrantPlugins
       end
 
       def ready?
+        @machine.env.ui.info("ready?")
         @logger.debug("Checking whether SSH is ready...")
 
         # Attempt to connect. This will raise an exception if it fails.
@@ -153,6 +154,7 @@ module VagrantPlugins
           # We catch a `VagrantError` which would signal that something went
           # wrong expectedly in the `connect`, which means we didn't connect.
           @logger.info("SSH not up: #{e.inspect}")
+          @machine.ui.detail("SSH not up: #{e.inspect}")
           return false
         end
 
@@ -171,7 +173,6 @@ module VagrantPlugins
         # If we used a password, then insert the insecure key
         ssh_info = @machine.ssh_info
         insert   = ssh_info[:password] && ssh_info[:private_key_path].empty?
-        
         binding.pry
         ssh_info[:private_key_path].each do |pk|
           if insecure_key?(pk)
@@ -184,7 +185,7 @@ module VagrantPlugins
         if insert
           # If we don't have the power to insert/remove keys, then its an error
           cap = @machine.guest.capability?(:insert_public_key) &&
-            @machine.guest.capability?(:remove_public_key)
+              @machine.guest.capability?(:remove_public_key)
           raise Vagrant::Errors::SSHInsertKeyUnsupported if !cap
 
           _pub, priv, openssh = Vagrant::Util::Keypair.create
@@ -207,8 +208,8 @@ module VagrantPlugins
           # Remove the old key if it exists
           @machine.ui.detail(I18n.t("vagrant.inserting_remove_key"))
           @machine.guest.capability(
-            :remove_public_key,
-            Vagrant.source_root.join("keys", "vagrant.pub").read.chomp)
+              :remove_public_key,
+              Vagrant.source_root.join("keys", "vagrant.pub").read.chomp)
 
           # Done, restart.
           @machine.ui.detail(I18n.t("vagrant.inserted_key"))
@@ -224,13 +225,13 @@ module VagrantPlugins
 
       def execute(command, opts=nil, &block)
         opts = {
-          error_check: true,
-          error_class: Vagrant::Errors::VagrantError,
-          error_key:   :ssh_bad_exit_status,
-          good_exit:   0,
-          command:     command,
-          shell:       nil,
-          sudo:        false,
+            error_check: true,
+            error_class: Vagrant::Errors::VagrantError,
+            error_key:   :ssh_bad_exit_status,
+            good_exit:   0,
+            command:     command,
+            shell:       nil,
+            sudo:        false,
         }.merge(opts || {})
 
         opts[:good_exit] = Array(opts[:good_exit])
@@ -240,8 +241,8 @@ module VagrantPlugins
         stderr = ""
         exit_status = connect do |connection|
           shell_opts = {
-            sudo: opts[:sudo],
-            shell: opts[:shell],
+              sudo: opts[:sudo],
+              shell: opts[:shell],
           }
 
           shell_execute(connection, command, **shell_opts) do |type, data|
@@ -261,9 +262,9 @@ module VagrantPlugins
           # but that makes for an ugly configuration parameter, so we
           # set it here from `error_key`
           error_opts = opts.merge(
-            _key: opts[:error_key],
-            stdout: stdout,
-            stderr: stderr
+              _key: opts[:error_key],
+              stdout: stdout,
+              stderr: stderr
           )
           raise opts[:error_class], error_opts
         end
@@ -345,8 +346,8 @@ module VagrantPlugins
         # Otherwise, it is a permission denied, so let's raise a proper
         # exception
         raise Vagrant::Errors::SCPPermissionDenied,
-          from: from.to_s,
-          to: to.to_s
+              from: from.to_s,
+              to: to.to_s
       end
 
       def reset!
@@ -412,18 +413,18 @@ module VagrantPlugins
 
         # Build the options we'll use to initiate the connection via Net::SSH
         common_connect_opts = {
-          auth_methods:          auth_methods,
-          config:                false,
-          forward_agent:         ssh_info[:forward_agent],
-          send_env:              ssh_info[:forward_env],
-          keys_only:             ssh_info[:keys_only],
-          verify_host_key:       ssh_info[:verify_host_key],
-          password:              ssh_info[:password],
-          port:                  ssh_info[:port],
-          timeout:               15,
-          user_known_hosts_file: [],
-          verbose:               :debug,
-          encryption:            cipher_array,
+            auth_methods:          auth_methods,
+            config:                false,
+            forward_agent:         ssh_info[:forward_agent],
+            send_env:              ssh_info[:forward_env],
+            keys_only:             ssh_info[:keys_only],
+            verify_host_key:       ssh_info[:verify_host_key],
+            password:              ssh_info[:password],
+            port:                  ssh_info[:port],
+            timeout:               15,
+            user_known_hosts_file: [],
+            verbose:               :debug,
+            encryption:            cipher_array,
         }
 
         # Connect to SSH, giving it a few tries
@@ -544,8 +545,8 @@ module VagrantPlugins
       # Executes the command on an SSH connection within a login shell.
       def shell_execute(connection, command, **opts)
         opts = {
-          sudo: false,
-          shell: nil
+            sudo: false,
+            shell: nil
         }.merge(opts)
 
         sudo  = opts[:sudo]
@@ -706,7 +707,7 @@ module VagrantPlugins
             channel.wait
           rescue Errno::ECONNRESET, IOError
             @logger.info(
-              "SSH connection unexpected closed. Assuming reboot or something.")
+                "SSH connection unexpected closed. Assuming reboot or something.")
             exit_status = 0
             pty = false
           rescue Net::SSH::ChannelOpenFailed
