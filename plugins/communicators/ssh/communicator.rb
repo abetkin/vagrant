@@ -149,13 +149,36 @@ module VagrantPlugins
 
         # Attempt to connect. This will raise an exception if it fails.
         begin
-          connect
-          @logger.info("SSH is ready!")
+          begin
+            connect
+            @logger.info("SSH is ready!")
 
-        rescue Vagrant::Errors::SSHAuthenticationFailed => e
-          binding.pry
-          connect
-          return false
+          rescue Vagrant::Errors::SSHAuthenticationFailed => e
+            _pub, priv, openssh = Vagrant::Util::Keypair.create
+
+            @logger.info("Inserting key to avoid password: #{openssh}")
+            @machine.ui.detail("\n"+I18n.t("vagrant.inserting_random_key"))
+            @machine.guest.capability(:insert_public_key, openssh)
+
+            # Write out the private key in the data dir so that the
+            # machine automatically picks it up.
+            @machine.data_dir.join("private_key").open("w+") do |f|
+              f.write(priv)
+            end
+
+            # Adjust private key file permissions if host provides capability
+            if @machine.env.host.capability?(:set_ssh_key_permissions)
+              @machine.env.host.capability(:set_ssh_key_permissions, @machine.data_dir.join("private_key"))
+            end
+
+            # Remove the old key if it exists
+            @machine.ui.detail(I18n.t("vagrant.inserting_remove_key"))
+            @machine.guest.capability(
+                :remove_public_key,
+                Vagrant.source_root.join("keys", "vagrant.pub").read.chomp)
+
+            connect
+          end
         rescue Vagrant::Errors::VagrantError => e
           # We catch a `VagrantError` which would signal that something went
           # wrong expectedly in the `connect`, which means we didn't connect.
@@ -184,9 +207,6 @@ module VagrantPlugins
 
         ssh_info[:private_key_path].each do |pk|
           if insecure_key?(pk)
-            binding.pry
-            connect
-
             insert = true
             @machine.ui.detail("\n"+I18n.t("vagrant.inserting_insecure_detected"))
             break
