@@ -145,13 +145,15 @@ module VagrantPlugins
       def ready?
         @logger.debug("Checking whether SSH is ready...")
 
+        auth_error = false
+
         # Attempt to connect. This will raise an exception if it fails.
         begin
           connect
           @logger.info("SSH is ready!")
 
         rescue Vagrant::Errors::SSHAuthenticationFailed => e
-          "pass"
+          auth_error = true
         rescue Vagrant::Errors::VagrantError => e
           # We catch a `VagrantError` which would signal that something went
           # wrong expectedly in the `connect`, which means we didn't connect.
@@ -170,6 +172,10 @@ module VagrantPlugins
         @lock.synchronize do
           return true if @inserted_key || !machine_config_ssh.insert_key
           @inserted_key = true
+        end
+
+        if auth_error
+          binding.pry
         end
 
         # If we used a password, then insert the insecure key
