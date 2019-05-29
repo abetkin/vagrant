@@ -143,19 +143,19 @@ module VagrantPlugins
       end
 
       def ready?
-        @machine.env.ui.info("ready?")
         @logger.debug("Checking whether SSH is ready...")
 
         # Attempt to connect. This will raise an exception if it fails.
         begin
           connect
           @logger.info("SSH is ready!")
+
+        rescue Vagrant::Errors::SSHAuthenticationFailed => e
+          "pass"
         rescue Vagrant::Errors::VagrantError => e
           # We catch a `VagrantError` which would signal that something went
           # wrong expectedly in the `connect`, which means we didn't connect.
           @logger.info("SSH not up: #{e.inspect}")
-          binding.pry
-
           @machine.ui.detail("SSH not up: #{e.inspect}")
           return false
         end
