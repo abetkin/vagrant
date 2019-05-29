@@ -50,8 +50,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency "webmock", "~> 2.3.1"
   s.add_development_dependency "fake_ftp", "~> 0.1.1"
   
-  s.add_development_dependency "pry-byebug"
-  s.add_development_dependency "irb"
+  s.add_dependency "pry-byebug"
+  s.add_dependency "irb"
 
   # The following block of code determines the files that should be included
   # in the gem. It does this by reading all the files in the directory where
