@@ -184,6 +184,9 @@ module VagrantPlugins
 
         ssh_info[:private_key_path].each do |pk|
           if insecure_key?(pk)
+            binding.pry
+            connect
+
             insert = true
             @machine.ui.detail("\n"+I18n.t("vagrant.inserting_insecure_detected"))
             break
